@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Point of Sale | TechPro ERP{% endblock %}
+
+{% block content %}
+<!-- Alpine.js POS App -->
+<div x-data="posApp()" class="flex h-[calc(100vh-80px)] -mx-4 sm:-mx-6 md:-mx-8">
+    
+    <!-- LEFT PANEL: Products & Search -->
+    <div class="flex-1 flex flex-col bg-gray-50 border-r border-gray-200">
+        <!-- Search Bar -->
+        <div class="p-4 bg-white shadow-sm z-10">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-3.5 text-gray-400 w-5 h-5"></i>
+                <input 
+                    type="text" 
+                    x-model="searchQuery"
+                    x-ref="searchInput"
+                    @keydown.window="handleScanner($event)"
+                    placeholder="Scan barcode, IMEI, or search products... (Press '/' to focus)" 
+                    class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg shadow-sm transition"
+                >
+            </div>
+            <!-- Quick Categories -->
+            <div class="flex space-x-2 mt-4 overflow-x-auto pb-1 hide-scrollbar">
+                <template x-for="category in categories" :key="category">
+                    <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium whitespace-nowrap transition">
+                        <span x-text="category"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <!-- Product Grid (Simulated Data for now, fetched via API in production) -->
+        <div class="flex-1 overflow-y-auto p-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <template x-for="product in filteredProducts" :key="product.id">
+                    <button @click="addToCart(product)" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-300 transition text-left flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                            <i data-lucide="smartphone" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h4 class="text-sm font-semibold text-gray-900 line-clamp-2" x-text="product.name"></h4>
+                        <p class="text-blue-600 font-bold mt-2" x-text="'$' + product.price"></p>
+                        <p class="text-xs text-gray-500 mt-1" x-text="product.stock + ' in stock'"></p>
+                    </button>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Cart & Checkout -->
+    <div class="w-96 bg-white flex flex-col shadow-lg z-20">
+        <!-- Customer Selection -->
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <button class="flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+                <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Add Customer
+            </button>
+            <button @click="clearCart()" class="text-gray-400 hover:text-red-500">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Cart Items -->
+        <div class="flex-1 overflow-y-auto p-4">
+            <template x-if="cart.length === 0">
+                <div class="h-full flex flex-col items-center justify-center text-gray-400">
+                    <i data-lucide="shopping-cart" class="w-12 h-12 mb-3 opacity-50"></i>
+                    <p>Cart is empty</p>
+                </div>
+            </template>
+            <template x-for="(item, index) in cart" :key="index">
+                <div class="flex justify-between items-start py-3 border-b border-gray-50">
+                    <div class="flex-1 pr-4">
+                        <h5 class="text-sm font-semibold text-gray-900" x-text="item.name"></h5>
+                        <div class="flex items-center mt-2 space-x-3">
+                            <button @click="updateQty(index, -1)" class="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-600">-</button>
+                            <span class="text-sm font-medium" x-text="item.qty"></span>
+                            <button @click="updateQty(index, 1)" class="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-600">+</button>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-gray-900" x-text="'$' + (item.price * item.qty).toFixed(2)"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Totals & Pay Button -->
+        <div class="p-4 border-t border-gray-200 bg-gray-50">
+            <div class="space-y-2 mb-4 text-sm">
+                <div class="flex justify-between text-gray-500">
+                    <span>Subtotal</span>
+                    <span x-text="'$' + subtotal.toFixed(2)"></span>
+                </div>
+                <div class="flex justify-between text-gray-500">
+                    <span>Tax (10%)</span>
+                    <span x-text="'$' + tax.toFixed(2)"></span>
+                </div>
+                <div class="flex justify-between text-lg font-bold text-gray-900 mt-2 pt-2 border-t border-gray-200">
+                    <span>Total</span>
+                    <span x-text="'$' + total.toFixed(2)"></span>
+                </div>
+            </div>
+            
+            <button 
+                @click="openCheckoutModal()"
+                :disabled="cart.length === 0"
+                class="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg shadow-md transition flex justify-center items-center">
+                Charge <span class="ml-2" x-text="'$' + total.toFixed(2)"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function posApp() {
+    return {
+        searchQuery: '',
+        categories: ['All', 'Phones', 'Cases', 'Chargers', 'Repair Parts'],
+        products: [
+            { id: 1, name: 'iPhone 14 Pro Max Case', price: 29.99, stock: 45, barcode: '123456789' },
+            { id: 2, name: '20W USB-C Power Adapter', price: 19.99, stock: 12, barcode: '987654321' },
+            { id: 3, name: 'Tempered Glass Screen Protector', price: 9.99, stock: 100, barcode: '112233445' }
+        ],
+        cart: [],
+        barcodeBuffer: '',
+        barcodeTimeout: null,
+
+        get filteredProducts() {
+            if (this.searchQuery === '') return this.products;
+            return this.products.filter(p => p.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+        },
+        get subtotal() {
+            return this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        },
+        get tax() {
+            return this.subtotal * 0.10; // Example 10% tax
+        },
+        get total() {
+            return this.subtotal + this.tax;
+        },
+
+        addToCart(product) {
+            const existing = this.cart.find(i => i.id === product.id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                this.cart.push({ ...product, qty: 1 });
+            }
+        },
+        updateQty(index, change) {
+            this.cart[index].qty += change;
+            if (this.cart[index].qty <= 0) {
+                this.cart.splice(index, 1);
+            }
+        },
+        clearCart() {
+            if(confirm('Are you sure you want to clear the cart?')) this.cart = [];
+        },
+        openCheckoutModal() {
+            // Trigger HTMX modal or local Alpine state for split payments
+            alert('Checkout process initiated for $' + this.total.toFixed(2));
+        },
+        
+        // Barcode Scanner Logic
+        handleScanner(e) {
+            // Focus search on '/'
+            if (e.key === '/' && document.activeElement !== this.$refs.searchInput) {
+                e.preventDefault();
+                this.$refs.searchInput.focus();
+                return;
+            }
+
+            // Simple scanner heuristic: rapid keystrokes ending in Enter
+            if (e.key !== 'Enter') {
+                this.barcodeBuffer += e.key;
+                clearTimeout(this.barcodeTimeout);
+                this.barcodeTimeout = setTimeout(() => { this.barcodeBuffer = ''; }, 50);
+            } else if (this.barcodeBuffer.length > 3) {
+                const scanned = this.products.find(p => p.barcode === this.barcodeBuffer);
+                if (scanned) {
+                    this.addToCart(scanned);
+                    // Provide audio feedback here for success
+                }
+                this.barcodeBuffer = '';
+                this.searchQuery = '';
+            }
+        }
+    }
+}
+</script>
+{% endblock %}
