@@ -1,0 +1,38 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Database
+*.db
+*.sqlite3
+alembic.ini
+
+# Redis & Celery
+dump.rdb
+celerybeat-schedule
+celerybeat.pid
+
+# Frontend Build / Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OS Generated
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
