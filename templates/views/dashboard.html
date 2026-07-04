@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Dashboard | TechPro ERP{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Executive Overview</h1>
+        <p class="text-sm text-gray-500">Real-time business insights and operations</p>
+    </div>
+    <div class="flex space-x-3">
+        <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center">
+            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Today
+        </button>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> New Sale
+        </button>
+    </div>
+</div>
+
+<!-- KPI Cards (Lazy Loaded via HTMX) -->
+<div hx-get="/api/v2/dashboard/kpis" hx-trigger="load" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Skeleton Loaders while fetching -->
+    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm animate-pulse h-32"></div>
+    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm animate-pulse h-32"></div>
+    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm animate-pulse h-32"></div>
+    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm animate-pulse h-32"></div>
+</div>
+
+<!-- Charts and Tables Area -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Chart -->
+    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm lg:col-span-2">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Revenue vs Profit</h2>
+        <div hx-get="/api/v2/dashboard/chart-data" hx-trigger="load">
+            <!-- Chart.js Canvas injected here -->
+            <div class="animate-pulse bg-gray-100 h-64 rounded-lg"></div>
+        </div>
+    </div>
+
+    <!-- Repair Pipeline -->
+    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Repair Pipeline</h2>
+        <div hx-get="/api/v2/dashboard/pipeline" hx-trigger="load">
+             <div class="animate-pulse bg-gray-100 h-64 rounded-lg"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
