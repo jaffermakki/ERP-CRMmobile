@@ -1,0 +1,8 @@
+[ Login Request ] --> [ Auth Router ] --> [ Verify Hash ] --> [ Generate JWT ]
+                                                                     |
+                                                                     v
+[ Dashboard View ] <-- [ HTMX Async Requests ] <-- [ API Validation (JWT) ]
+      |
+      ├── Widget: Today's KPIs (Revenue, Profit)
+      ├── Widget: Repair Pipeline (Pending, Ready)
+      └── Widget: Monthly Revenue Chart (Chart.js)
