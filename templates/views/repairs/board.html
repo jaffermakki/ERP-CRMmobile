@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Repair Pipeline | TechPro ERP{% endblock %}
+
+{% block content %}
+<div class="flex flex-col h-[calc(100vh-100px)]">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Repair Pipeline</h1>
+            <p class="text-sm text-gray-500">Drag and drop tickets to update status</p>
+        </div>
+        <div class="flex space-x-3">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400 w-4 h-4"></i>
+                <input type="text" placeholder="Search ticket or IMEI..." class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <a href="/repairs/intake" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center shadow-sm">
+                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> New Intake
+            </a>
+        </div>
+    </div>
+
+    <!-- Kanban Board (Alpine.js used for local drag state before HTMX sync) -->
+    <div class="flex-1 overflow-x-auto pb-4 hide-scrollbar" x-data="kanbanBoard()">
+        <div class="flex space-x-6 min-w-max h-full">
+            
+            <!-- Column: Received -->
+            <div class="w-80 flex flex-col bg-gray-50/50 rounded-xl border border-gray-200">
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-white rounded-t-xl">
+                    <h3 class="font-semibold text-gray-700 flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span> Received
+                    </h3>
+                    <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">3</span>
+                </div>
+                <div class="flex-1 p-3 overflow-y-auto space-y-3">
+                    <!-- Ticket Card -->
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition cursor-grab group">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">#REP-1042</span>
+                            <span class="text-xs text-gray-400">2h ago</span>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 text-sm mb-1">iPhone 13 Pro</h4>
+                        <p class="text-xs text-gray-500 mb-3">Screen Replacement • John Doe</p>
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <i data-lucide="user" class="w-3 h-3 mr-1"></i> Unassigned
+                            </div>
+                            <span class="px-2 py-1 bg-red-50 text-red-600 text-[10px] font-bold rounded uppercase tracking-wider">High</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column: Diagnosing -->
+            <div class="w-80 flex flex-col bg-gray-50/50 rounded-xl border border-gray-200">
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-white rounded-t-xl">
+                    <h3 class="font-semibold text-gray-700 flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-purple-500 mr-2"></span> Diagnosing
+                    </h3>
+                    <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">1</span>
+                </div>
+                <div class="flex-1 p-3 overflow-y-auto space-y-3">
+                    <!-- Ticket Card -->
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition cursor-grab group">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">#REP-1041</span>
+                            <span class="text-xs text-gray-400">1d ago</span>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 text-sm mb-1">Samsung Galaxy S22</h4>
+                        <p class="text-xs text-gray-500 mb-3">Not Charging • Sarah Smith</p>
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <div class="w-5 h-5 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-[10px] mr-1">MK</div> Mike T.
+                            </div>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">Normal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Columns: Waiting Parts, Repairing, Ready... -->
+            <div class="w-80 flex flex-col bg-gray-50/50 rounded-xl border border-gray-200 opacity-75 border-dashed">
+                <div class="flex-1 flex items-center justify-center">
+                    <p class="text-gray-400 text-sm font-medium">+ Add Custom Status</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function kanbanBoard() {
+    return {
+        // Future: Add SortableJS logic here for seamless drag-and-drop 
+        // that triggers HTMX calls to update the database status.
+    }
+}
+</script>
+{% endblock %}
