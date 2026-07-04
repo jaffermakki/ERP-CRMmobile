@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory Management | TechPro ERP{% endblock %}
+
+{% block content %}
+<div class="flex flex-col h-full" x-data="{ view: 'grid', search: '' }">
+    <!-- Header & Actions -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Inventory</h1>
+            <p class="text-sm text-gray-500">Manage stock, pricing, and reorder levels</p>
+        </div>
+        <div class="flex space-x-3">
+            <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center shadow-sm">
+                <i data-lucide="download" class="w-4 h-4 mr-2"></i> Export
+            </button>
+            <button hx-get="/inventory/form" hx-target="#modal-container" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center shadow-sm">
+                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Product
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
+        <div class="flex items-center space-x-4 flex-1">
+            <div class="relative w-full max-w-md">
+                <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400 w-5 h-5"></i>
+                <input type="text" x-model="search" placeholder="Search SKU, Barcode, or Product Name..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition">
+            </div>
+            <select class="border border-gray-300 rounded-lg text-sm px-4 py-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="all">All Categories</option>
+                <option value="phones">Phones</option>
+                <option value="displays">Displays</option>
+                <option value="accessories">Accessories</option>
+            </select>
+            <select class="border border-gray-300 rounded-lg text-sm px-4 py-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="all">Stock Status</option>
+                <option value="low">Low Stock</option>
+                <option value="out">Out of Stock</option>
+            </select>
+        </div>
+        
+        <div class="flex bg-gray-100 rounded-lg p-1">
+            <button @click="view = 'list'" :class="{'bg-white shadow-sm text-blue-600': view === 'list', 'text-gray-500 hover:text-gray-700': view !== 'list'}" class="p-1.5 rounded-md transition">
+                <i data-lucide="list" class="w-4 h-4"></i>
+            </button>
+            <button @click="view = 'grid'" :class="{'bg-white shadow-sm text-blue-600': view === 'grid', 'text-gray-500 hover:text-gray-700': view !== 'grid'}" class="p-1.5 rounded-md transition">
+                <i data-lucide="grid" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Data Table (List View) -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" x-show="view === 'list'">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                        <th class="p-4 font-semibold">Product</th>
+                        <th class="p-4 font-semibold">SKU / Barcode</th>
+                        <th class="p-4 font-semibold">Category</th>
+                        <th class="p-4 font-semibold text-right">Price</th>
+                        <th class="p-4 font-semibold text-center">Available</th>
+                        <th class="p-4 font-semibold text-center">Reserved</th>
+                        <th class="p-4 font-semibold text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm" hx-get="/api/v2/inventory/list" hx-trigger="load">
+                    <!-- Example Row (Will be populated by HTMX/Jinja) -->
+                    <tr class="hover:bg-gray-50 transition group">
+                        <td class="p-4 flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                                <i data-lucide="smartphone" class="w-5 h-5 text-gray-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">iPhone 13 Pro Display</p>
+                                <p class="text-xs text-gray-500">OLED Premium Aftermarket</p>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <p class="font-medium text-gray-900">SKU-IP13P-DSP</p>
+                            <p class="text-xs text-gray-500">1928374650</p>
+                        </td>
+                        <td class="p-4">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                Displays
+                            </span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <p class="font-bold text-gray-900">$120.00</p>
+                            <p class="text-xs text-green-600">Margin: 45%</p>
+                        </td>
+                        <td class="p-4 text-center">
+                            <!-- Low stock indicator -->
+                            <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-sm font-bold bg-yellow-100 text-yellow-800">
+                                4
+                            </span>
+                        </td>
+                        <td class="p-4 text-center text-gray-500 font-medium">
+                            2
+                        </td>
+                        <td class="p-4 text-center">
+                            <button class="text-gray-400 hover:text-blue-600 transition p-1">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-gray-400 hover:text-gray-900 transition p-1">
+                                <i data-lucide="activity" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+            <span class="text-sm text-gray-500">Showing 1 to 10 of 1,234 entries</span>
+            <div class="flex space-x-1">
+                <button class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 hover:bg-gray-50 text-sm">Prev</button>
+                <button class="px-3 py-1 border border-blue-600 rounded-md bg-blue-50 text-blue-600 font-medium text-sm">1</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 hover:bg-gray-50 text-sm">2</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 hover:bg-gray-50 text-sm">Next</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Container for HTMX injections -->
+    <div id="modal-container"></div>
+</div>
+{% endblock %}
