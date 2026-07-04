@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased text-gray-900 bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TechPro ERP{% endblock %}</title>
+    
+    <!-- Tailwind CSS (CDN for dev, build step for production) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- HTMX for SPA feel -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    
+    <!-- Alpine.js for lightweight UI interactions -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="flex h-screen overflow-hidden bg-gray-50 font-sans" hx-boost="true">
+    
+    <!-- Sidebar Component -->
+    {% include 'components/sidebar.html' %}
+
+    <!-- Main Content Area -->
+    <div class="flex flex-col flex-1 w-0 overflow-hidden">
+        {% include 'components/topbar.html' %}
+        
+        <main class="flex-1 relative overflow-y-auto focus:outline-none">
+            <div class="py-6 px-4 sm:px-6 md:px-8" id="main-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize icons after HTMX swaps
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            lucide.createIcons();
+        });
+        lucide.createIcons();
+    </script>
+</body>
+</html>
